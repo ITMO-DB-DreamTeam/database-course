@@ -333,7 +333,7 @@ ALTER TABLE `publication`
 --
 -- Индексы таблицы `publication_co-authors`
 --
-ALTER TABLE `publication_co-authors`
+ALTER TABLE `publication_coauthors`
   ADD PRIMARY KEY (`id`),
   ADD KEY `publication_id` (`publication_id`),
   ADD KEY `user_id` (`user_id`);
@@ -430,7 +430,7 @@ ALTER TABLE `publication`
 --
 -- AUTO_INCREMENT для таблицы `publication_co-authors`
 --
-ALTER TABLE `publication_co-authors`
+ALTER TABLE `publication_coauthors`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -495,9 +495,9 @@ ALTER TABLE `publication`
 --
 -- Ограничения внешнего ключа таблицы `publication_co-authors`
 --
-ALTER TABLE `publication_co-authors`
-  ADD CONSTRAINT `publication_co-authors_ibfk_1` FOREIGN KEY (`publication_id`) REFERENCES `publication` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `publication_co-authors_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `publication_coauthors`
+  ADD CONSTRAINT `publication_coauthors_ibfk_1` FOREIGN KEY (`publication_id`) REFERENCES `publication` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `publication_coauthors_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ограничения внешнего ключа таблицы `user`

@@ -1,5 +1,6 @@
 import mysql.connector
 import cx_Oracle
+import time
 
 
 def connect_to_mysql():
@@ -162,8 +163,10 @@ def handle_conference_member():
     for batch in batches:
         ins_items = []
         for row in batch:
-            ins_items.append((row['conference_id'], row['user_id']))
-        sql = 'INSERT INTO awm.conference_member(conference_id, person_id) SELECT :1,:2 FROM dual where not exists(select * from awm.conference_member where (conference_id = :1 AND person_id = :2))'
+            # ins_items.append((row['conference_id'], row['user_id']))
+            ins_items.append((row['id'], row['conference_id'], row['user_id']))
+        # sql = 'INSERT INTO awm.conference_member(conference_id, person_id) SELECT :1,:2 FROM dual where not exists(select * from awm.conference_member where (conference_id = :1 AND person_id = :2))'
+        sql = 'INSERT INTO awm.conference_member(conference_member_id, conference_id, person_id) SELECT :1,:2,:3 FROM dual where not exists(select * from awm.conference_member where (conference_member_id = :1))'
         cursor_awm.executemany(sql, ins_items)
         db_awm.commit()
     print("done")
@@ -194,8 +197,10 @@ def handle_library_card():
     for batch in batches:
         ins_items = []
         for row in batch:
-            ins_items.append((row['user_id'], row['book_id'], row['tooked'], row['returned']))
-        sql = 'INSERT INTO awm.library_card(person_id, book_id, taken_date, returned_date) SELECT :1,:2,:3,:4 FROM dual where not exists(select * from awm.library_card where (person_id = :1 AND book_id = :2 AND taken_date = :3 AND returned_date = :4))'
+            # ins_items.append((row['user_id'], row['book_id'], row['tooked'], row['returned']))
+            ins_items.append((row['id'], row['user_id'], row['book_id'], row['tooked'], row['returned']))
+        # sql = 'INSERT INTO awm.library_card(person_id, book_id, taken_date, returned_date) SELECT :1,:2,:3,:4 FROM dual where not exists(select * from awm.library_card where (person_id = :1 AND book_id = :2 AND taken_date = :3 AND returned_date = :4))'
+        sql = 'INSERT INTO awm.library_card(library_card_id, person_id, book_id, taken_date, returned_date) SELECT :1,:2,:3,:4,:5 FROM dual where not exists(select * from awm.library_card where (library_card_id = :1))'
         cursor_awm.executemany(sql, ins_items)
         db_awm.commit()
     print("done")
@@ -226,8 +231,10 @@ def handle_project_member():
     for batch in batches:
         ins_items = []
         for row in batch:
-            ins_items.append((row['project_id'], row['user_id'], row['started'], row['ended']))
-        sql = 'INSERT INTO awm.project_member(project_id, person_id, start_date, end_date) SELECT :1,:2,:3,:4 FROM dual where not exists(select * from awm.project_member where (project_id = :1 AND person_id = :2 AND start_date = :3 AND end_date = :4))'
+            # ins_items.append((row['project_id'], row['user_id'], row['started'], row['ended']))
+            ins_items.append((row['id'], row['project_id'], row['user_id'], row['started'], row['ended']))
+        # sql = 'INSERT INTO awm.project_member(project_id, person_id, start_date, end_date) SELECT :1,:2,:3,:4 FROM dual where not exists(select * from awm.project_member where (project_id = :1 AND person_id = :2 AND start_date = :3 AND end_date = :4))'
+        sql = 'INSERT INTO awm.project_member(project_member_id, project_id, person_id, start_date, end_date) SELECT :1,:2,:3,:4,:5 FROM dual where not exists(select * from awm.project_member where (project_member_id = :1))'
         cursor_awm.executemany(sql, ins_items)
         db_awm.commit()
     print("done")
@@ -250,39 +257,40 @@ def handle_publication():
 
 
 def handle_publication_co_authors():
-    print("handle table 'publication_co-authors'")
-    cursor_mysql.execute("SELECT * FROM laba.publication_co-authors")
+    print("handle table 'publication_coauthors'")
+    cursor_mysql.execute("SELECT * FROM laba.publication_coauthors")
     result = cursor_mysql.fetchall()
 
     batches = split_list(result, wanted_parts=len(result)//10000)
     for batch in batches:
         ins_items = []
         for row in batch:
-            ins_items.append((row['publication_id'], row['user_id']))
-        sql = 'INSERT INTO awm.publication_coauthors(publication_id, person_id) SELECT :1,:2 FROM dual where not exists(select * from awm.publication_coauthors where (publication_id = :1 AND person_id = :2))'
+            # ins_items.append((row['publication_id'], row['user_id']))
+            ins_items.append((row['id'], row['publication_id'], row['user_id']))
+        sql = 'INSERT INTO awm.publication_coauthors(publication_coauthors_id, publication_id, person_id) SELECT :1,:2,:3 FROM dual where not exists(select * from awm.publication_coauthors where (publication_coauthors_id = :1))'
         cursor_awm.executemany(sql, ins_items)
         db_awm.commit()
     print("done")
 
 
 cursor_awm, db_awm, cursor_mysql, db_mysql = None, None, None, None
-# main script
 try:
+    start_time = time.time()
     db_mysql = connect_to_mysql()
     db_awm = connect_to_awm()
 
     cursor_mysql = db_mysql.cursor(dictionary=True)
     cursor_awm = db_awm.cursor()
 
-    # handle_edition_place()
-    # handle_edition_lang()
-    # handle_edition_type()
-    # handle_publication_type()
-    # handle_user_position()
-    # handle_user()
-    # handle_book()
-    # handle_conference()
-    # handle_conference_member()
+    handle_edition_place()
+    handle_edition_lang()
+    handle_edition_type()
+    handle_publication_type()
+    handle_user_position()
+    handle_user()
+    handle_book()
+    handle_conference()
+    handle_conference_member()
     handle_edition()
     handle_library_card()
     handle_project()
@@ -290,6 +298,7 @@ try:
     handle_publication()
     handle_publication_co_authors()
 
+    print("Время выполнения:", round(time.time() - start_time, 3), "сек.")
 except Exception as e:
     print("ERROR MYSQL_AGGREGATOR:", e)
 finally:
