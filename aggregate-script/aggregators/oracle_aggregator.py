@@ -81,6 +81,72 @@ def handle_direction():
         cursor_awm.executemany(sql, ins_items)
         db_awm.commit()
     print("done")
+
+
+def handle_discipline():
+    print("handle table 'discipline'")
+    cursor_oracle.execute("SELECT * FROM \"laba\".discipline")
+    result = cursor_oracle.fetchall()
+
+    batches = split_list(result, wanted_parts=len(result)//10000)
+    for batch in batches:
+        ins_items = []
+        for row in batch:
+            ins_items.append((row['id'], row['name']))
+        sql = 'INSERT INTO awm.discipline(discipline_id, name) SELECT :1,:2 FROM dual where not exists(select * from awm.discipline where (discipline_id = :1))'
+        cursor_awm.executemany(sql, ins_items)
+        db_awm.commit()
+    print("done")
+
+
+def handle_educational_form():
+    print("handle table 'educational_form'")
+    cursor_oracle.execute("SELECT * FROM \"laba\".educational_form")
+    result = cursor_oracle.fetchall()
+
+    batches = split_list(result, wanted_parts=len(result)//10000)
+    for batch in batches:
+        ins_items = []
+        for row in batch:
+            ins_items.append((row['id'], row['name']))
+        sql = 'INSERT INTO awm.educational_form(educational_form_id, name) SELECT :1,:2 FROM dual where not exists(select * from awm.educational_form where (educational_form_id = :1))'
+        cursor_awm.executemany(sql, ins_items)
+        db_awm.commit()
+    print("done")
+
+
+def handle_faculty():
+    print("handle table 'faculty'")
+    cursor_oracle.execute("SELECT * FROM \"laba\".faculty")
+    result = cursor_oracle.fetchall()
+
+    batches = split_list(result, wanted_parts=len(result)//10000)
+    for batch in batches:
+        ins_items = []
+        for row in batch:
+            ins_items.append((row['id'], row['mega_id'], row['name']))
+        sql = 'INSERT INTO awm.faculty(faculty_id, mega_faculty_id, name) SELECT :1,:2,:3 FROM dual where not exists(select * from awm.faculty where (faculty_id = :1))'
+        cursor_awm.executemany(sql, ins_items)
+        db_awm.commit()
+    print("done")
+
+
+def handle_mega_faculty():
+    print("handle table 'mega_faculty'")
+    cursor_oracle.execute("SELECT * FROM \"laba\".mega_faculty")
+    result = cursor_oracle.fetchall()
+
+    batches = split_list(result, wanted_parts=len(result)//10000)
+    for batch in batches:
+        ins_items = []
+        for row in batch:
+            ins_items.append((row['id'], row['name']))
+        sql = 'INSERT INTO awm.mega_faculty(mega_faculty_id, name) SELECT :1,:2 FROM dual where not exists(select * from awm.mega_faculty where (mega_faculty_id = :1))'
+        cursor_awm.executemany(sql, ins_items)
+        db_awm.commit()
+    print("done")
+
+
 cursor_awm, db_awm, cursor_oracle, db_oracle = None, None, None, None
 try:
     start_time = time.time()
@@ -93,6 +159,10 @@ try:
     handle_classroom()
     handle_degree()
     handle_direction()
+    handle_discipline()
+    handle_educational_form()
+    handle_faculty()
+    handle_mega_faculty()
 
     print("Время выполнения:", round(time.time() - start_time, 3), "сек.")
 except Exception as e:
